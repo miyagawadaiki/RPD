@@ -133,11 +133,11 @@ def change_way_cal(canvas, ax):
     if option==1:
         option=0
         txt.delete(0, tkinter.END)
-        txt.insert(tkinter.END,"The method of cluculation is DETERMINANT")
+        txt.insert(tkinter.END,"The method of calcuculation is DETERMINANT")
     else:
         option=1
         txt.delete(0, tkinter.END)
-        txt.insert(tkinter.END,"The method of cluculation is INVERSE MATRIX")
+        txt.insert(tkinter.END,"The method of calcuculation is INVERSE MATRIX")
     
     DrawCanvas(canvas, ax, colors = "gray")
     
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     try:
         #generate GUI
         root = tkinter.Tk()
-        root.geometry("660x500")
+        root.geometry("700x550")
         root.title("GUI- vs 1,000+2 Strategies Under Discounting and Observation Errors in RPD game")
         
         #generate graph
