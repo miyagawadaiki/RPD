@@ -1,0 +1,1 @@
+pyinstaller python filename.py --onefile --noconsole
