@@ -124,6 +124,13 @@ def PD(l,p,q,f,epsilon,xi,w):
               ]
 
         return 2*q[l]*LA.det(pD1) +LA.det(pD2) +LA.det(pD3)
+    else:
+        s = (PD(0,p,q,f,epsilon,xi,w)**2
+            + PD(1,p,q,f,epsilon,xi,w)**2
+            + PD(2,p,q,f,epsilon,xi,w)**2
+            + PD(3,p,q,f,epsilon,xi,w)**2
+            + PD(4,p,q,f,epsilon,xi,w)**2)
+        return .8 if s < 0.00001 else 0.
 
 
 def Calculation_Determinant(p,q_list,epsilon,xi,Sx,Sy,w):
@@ -184,114 +191,6 @@ def Calculation_Inverse(p,q_list,epsilon,xi,Sx,Sy,w):
         ly.append(sy)
     return ly,lx
 
-
-"""
-def calc_D(p,q,Sx,epsilon,xi,w):
-    sp.var('p0_ p1_ p2_ p3_ p4_')
-    sp.var('q0_ q1_ q2_ q3_ q4_')
-    sp.var('f1_ f2_ f3_ f4_ epsilon_ tau_ mu_ eta_ xi_ w_')
-    
-    D = sp.Matrix([
-        [w_*(tau_*p1_*q1_+epsilon_*p1_*q2_+epsilon_*p2_*q1_+xi_*p2_*q2_)-1+(1-w_)*p0_*q0_,
-         w_*(mu_*p1_+eta_*p2_)-1+(1-w_)*p0_,
-         w_*(mu_*q1_+eta_*q2_)-1+(1-w_)*q0_,
-         f1_
-        ],
-        [w_*(epsilon_*p1_*q3_+xi_*p1_*q4_+tau_*p2_*q3_+epsilon_*p2_*q4_)+(1-w_)*p0_*q0_,
-         w_*(eta_*p1_+mu_*p2_)-1+(1-w_)*p0_,
-         w_*(mu_*q3_+eta_*q4_)  +(1-w_)*q0_,
-         f3_
-        ],
-        [w_*(epsilon_*p3_*q1_+tau_*p3_*q2_+xi_*p4_*q1_+epsilon_*p4_*q2_)+(1-w_)*p0_*q0_,
-         w_*(mu_*p3_+eta_*p4_)  +(1-w_)*p0_,
-         w_*(eta_*q1_+mu_*q2_)-1+(1-w_)*q0_,
-         f2_
-        ],
-        [w_*(xi_*p3_*q3_+epsilon_*p3_*q4_+epsilon_*p4_*q3_+tau_*p4_*q4_)+(1-w_)*p0_*q0_,
-         w_*(eta_*p3_+mu_*p4_)+(1-w_)*p0_,
-         w_*(eta_*q3_+mu_*q4_)+(1-w_)*q0_,
-         f4_
-        ]
-    ])
-    
-    D_ = D.subs(list(zip([p0_,p1_,p2_,p3_,p4_],p)))
-    D_ = D_.subs(list(zip([q0_,q1_,q2_,q3_,q4_],q)))
-    D_ = D_.subs(list(zip([f1_,f2_,f3_,f4_],Sx)))
-    D_ = D_.subs([(tau_,1-2*epsilon_-xi_),(mu_,1-epsilon_-xi_),(eta_,epsilon_+xi_),
-                 (epsilon_,epsilon),(xi_,xi),(w_,w)])
-    
-    return D_.det()
-
-
-def calc_pD(l,p,q,Sx,epsilon,xi,w):
-    sp.var('p0_ p1_ p2_ p3_ p4_')
-    sp.var('q0_ q1_ q2_ q3_ q4_')
-    sp.var('f1_ f2_ f3_ f4_ epsilon_ tau_ mu_ eta_ xi_ w_')
-
-    qv = (q0_,q1_,q2_,q3_,q4_)
-    qd = q.copy()
-    qd[l] = 0.
-
-    subs_list = [(p0_, p[0]), (p1_, p[1]), (p2_, p[2]), (p3_, p[3]), (p4_, p[4]),
-                 (q0_, qd[0]), (q1_, qd[1]), (q2_, qd[2]), (q3_, qd[3]), (q4_, qd[4]),
-                 (f1_, Sx[0]), (f2_, Sx[1]), (f3_, Sx[2]), (f4_, Sx[3]),
-                 (tau_,1-2*epsilon_-xi_),(mu_,1-epsilon_-xi_),(eta_,epsilon_+xi_),
-                 (epsilon_,epsilon),(xi_,xi),(w_,w)
-                ]
-
-    D = sp.Matrix([
-        [w_*(tau_*p1_*q1_+epsilon_*p1_*q2_+epsilon_*p2_*q1_+xi_*p2_*q2_)-1+(1-w_)*p0_*q0_,
-         w_*(mu_*p1_+eta_*p2_)-1+(1-w_)*p0_,
-         w_*(mu_*q1_+eta_*q2_)-1+(1-w_)*q0_,
-         f1_
-        ],
-        [w_*(epsilon_*p1_*q3_+xi_*p1_*q4_+tau_*p2_*q3_+epsilon_*p2_*q4_)+(1-w_)*p0_*q0_,
-         w_*(eta_*p1_+mu_*p2_)-1+(1-w_)*p0_,
-         w_*(mu_*q3_+eta_*q4_)  +(1-w_)*q0_,
-         f3_
-        ],
-        [w_*(epsilon_*p3_*q1_+tau_*p3_*q2_+xi_*p4_*q1_+epsilon_*p4_*q2_)+(1-w_)*p0_*q0_,
-         w_*(mu_*p3_+eta_*p4_)  +(1-w_)*p0_,
-         w_*(eta_*q1_+mu_*q2_)-1+(1-w_)*q0_,
-         f2_
-        ],
-        [w_*(xi_*p3_*q3_+epsilon_*p3_*q4_+epsilon_*p4_*q3_+tau_*p4_*q4_)+(1-w_)*p0_*q0_,
-         w_*(eta_*p3_+mu_*p4_)+(1-w_)*p0_,
-         w_*(eta_*q3_+mu_*q4_)+(1-w_)*q0_,
-         f4_
-        ]
-    ])
-
-    pD = sp.Matrix([
-      [sp.diff(D[0,0],qv[l]), sp.diff(D[0,1],qv[l]), sp.diff(D[0,2],qv[l]), sp.diff(D[0,3],qv[l])],
-      [sp.diff(D[1,0],qv[l]), sp.diff(D[1,1],qv[l]), sp.diff(D[1,2],qv[l]), sp.diff(D[1,3],qv[l])],
-      [sp.diff(D[2,0],qv[l]), sp.diff(D[2,1],qv[l]), sp.diff(D[2,2],qv[l]), sp.diff(D[2,3],qv[l])],
-      [sp.diff(D[3,0],qv[l]), sp.diff(D[3,1],qv[l]), sp.diff(D[3,2],qv[l]), sp.diff(D[3,3],qv[l])]
-     ])
-
-    pD1 = sp.Matrix([
-      [pD[0,0], D[0,1], pD[0,2], D[0,3]],
-      [pD[1,0], D[1,1], pD[1,2], D[1,3]],
-      [pD[2,0], D[2,1], pD[2,2], D[2,3]],
-      [pD[3,0], D[3,1], pD[3,2], D[3,3]]
-    ]).subs(subs_list)
-
-    pD2 = sp.Matrix([
-      [pD[0,0], D[0,1], D[0,2], D[0,3]],
-      [pD[1,0], D[1,1], D[1,2], D[1,3]],
-      [pD[2,0], D[2,1], D[2,2], D[2,3]],
-      [pD[3,0], D[3,1], D[3,2], D[3,3]]
-    ]).subs(subs_list)
-
-    pD3 = sp.Matrix([
-      [D[0,0], D[0,1], pD[0,2], D[0,3]],
-      [D[1,0], D[1,1], pD[1,2], D[1,3]],
-      [D[2,0], D[2,1], pD[2,2], D[2,3]],
-      [D[3,0], D[3,1], pD[3,2], D[3,3]]
-    ]).subs(subs_list)
-
-    return 2*q[l]*pD1.det() +pD2.det() +pD3.det()
-"""
 
 
 def Calc_Partial_Derivative(l, p, q_list, epsilon, xi, Sx, w):
@@ -355,13 +254,19 @@ def change_way_cal(canvas, ax):
     DrawCanvas(canvas, ax, colors = "gray")
 
 def switch_view(canvas, ax, switch_N_to_P):
-    selected_opt = listbox.get(listbox.curselection()[0])
-    global draw_coord
+    l = listbox.curselection()[0]
+    selected_opt = listbox.get(l)
+    global draw_coord, pd_Sx_flag
+    ss = "sX" if pd_Sx_flag else "sY"
+    partial = r"d"
 
     if switch_N_to_P and draw_coord:
         draw_coord = False
         txt.delete(0, tkinter.END)
-        txt.insert(tkinter.END, f"Partial derivative view ({selected_opt})")
+        if l < 5:
+            txt.insert(tkinter.END, r"Partial derivative view ({0}{1}/{0}{2})".format(partial, ss, selected_opt))
+        else:
+            txt.insert(tkinter.END, r"Partial derivative view (suboptimal)")
 
     elif switch_N_to_P and not(draw_coord):
         draw_coord = True
@@ -371,7 +276,10 @@ def switch_view(canvas, ax, switch_N_to_P):
     else:
         draw_coord = False
         txt.delete(0, tkinter.END)
-        txt.insert(tkinter.END, f"Partial derivative view ({selected_opt})")
+        if l < 5:
+            txt.insert(tkinter.END, r"Partial derivative view ({0}{1}/{0}{2})".format(partial, ss, selected_opt))
+        else:
+            txt.insert(tkinter.END, r"Partial derivative view (suboptimal)")
 
     Select_DrawCanvas(canvas, ax, colors = "gray")
 
@@ -492,14 +400,28 @@ def DrawCanvas_adapting_path(canvas, ax, colors = "gray"):
     q_list.append([0,0,0,0,0]); q_list.append([1,1,1,1,1]);
     y,x = Select_Method_Calculation(p,q_list,epsilon,xi,Sx,Sy,w,option)
     
-    pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sx,w)
-    plt.scatter(y, x, s=20, c=pds, alpha=1, linewidths=0.1, edgecolors='k', cmap='bwr_r', vmin=-1., vmax=1., zorder=2)
-    #plt.scatter(y,x,s=3,c='k',alpha=0.8)
+    if pd_Sx_flag:
+        pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sx,w)
+    else:
+        pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sy,w)
+    if l < 5:
+        plt.scatter(y, x, s=20, c=pds, alpha=1, linewidths=0.1, edgecolors='k', cmap='bwr_r', vmin=-1., vmax=1., zorder=2)
+    else:
+        plt.scatter(y, x, s=20, c=pds, alpha=.5, linewidths=0.2, edgecolors='k', cmap='Reds', zorder=2)
     #plt.rcParams["font.size"] = 15
     
     canvas.draw()
 
+
+def _set_pd_Sx_flag(event):
+    global pd_Sx_flag
+
+    pd_Sx_flag = not(pd_Sx_flag)
+    switch_view(Canvas, ax1, draw_coord)
+    Select_DrawCanvas(Canvas, ax1)
+
 draw_coord = True
+pd_Sx_flag = True
 
 if __name__ == "__main__":
     try:
@@ -520,17 +442,17 @@ if __name__ == "__main__":
         q_list=[[random.random(),random.random(),random.random(),random.random(),random.random()] for i in range(1000)]
         
         ReDrawButton = tkinter.Button(text="Other Opponent", width=15, command=partial(change_q, Canvas, ax1))
-        ReDrawButton.grid(row=12, column=1, columnspan=1)
+        ReDrawButton.grid(row=8, column=1, columnspan=1)
         TRPSButton = tkinter.Button(text="TRPS 5310", width=15, command=partial(change_5310, Canvas, ax1))
-        TRPSButton.grid(row=14, column=1, columnspan=1)
+        TRPSButton.grid(row=9, column=1, columnspan=1)
         SaveButton = tkinter.Button(text="Save Fig", width=15, command=save_fig)
-        SaveButton.grid(row=16, column=1, columnspan=1)
-        SaveButton = tkinter.Button(text="Method", width=15, command=partial(change_way_cal,Canvas, ax1))
         SaveButton.grid(row=10, column=1, columnspan=1)
+        SaveButton = tkinter.Button(text="Method", width=15, command=partial(change_way_cal,Canvas, ax1))
+        SaveButton.grid(row=7, column=1, columnspan=1)
         SwViewButton = tkinter.Button(text="Switch Normal/AP", width=15, command=partial(switch_view, Canvas, ax1, True))
-        SwViewButton.grid(row=18, column=1, columnspan=1)
+        SwViewButton.grid(row=11, column=1, columnspan=1)
         QuitButton = tkinter.Button(text="Quit", width=15, command=Quit)
-        QuitButton.grid(row=20, column=1, columnspan=1)
+        QuitButton.grid(row=12, column=1, columnspan=1)
         
 
         scale0 = tkinter.Scale(root, label='p0', orient='h', from_=0, to=1000, command=partial(Select_DrawCanvas, Canvas, ax1))
@@ -553,12 +475,16 @@ if __name__ == "__main__":
 
         # for partial derivative view 
         view_var = tkinter.StringVar()
-        listbox = tkinter.Listbox(root, height=5, width=10)
-        for line in ["q0", "q1","q2","q3", "q4"]:
+        listbox = tkinter.Listbox(root, height=6, width=8)
+        for line in ["q0", "q1","q2","q3", "q4", "suboptimal"]:
             listbox.insert(tkinter.END, line)
         listbox.select_set(1)
-        listbox.grid(row=6, column=1)
+        listbox.grid(row=8, column=3, rowspan=4, columnspan=1)
         listbox.bind('<<ListboxSelect>>', lambda event: switch_view(Canvas, ax1, False))
+
+        root.bind("<KeyPress-v>", lambda event: switch_view(Canvas, ax1, True))
+
+        root.bind("<Shift-KeyPress-V>", _set_pd_Sx_flag)
 
         
         lbl = tkinter.Label(text='Message:')
@@ -566,6 +492,7 @@ if __name__ == "__main__":
         txt = tkinter.Entry(width=50)
         txt.place(x=10, y=480)
         txt.insert(tkinter.END,"Welcome!")
+
         
         Select_DrawCanvas(Canvas,ax1)
         root.mainloop()
