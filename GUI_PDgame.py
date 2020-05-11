@@ -1,6 +1,6 @@
 #-*-coding:utf-8-*-
 import numpy as np
-import sympy as sp
+#import sympy as sp
 import numpy.linalg as LA
 import random
 import tkinter
@@ -251,7 +251,7 @@ def change_way_cal(canvas, ax):
         txt.delete(0, tkinter.END)
         txt.insert(tkinter.END,"The method of calcuculation is INVERSE MATRIX")
     
-    DrawCanvas(canvas, ax, colors = "gray")
+    Select_DrawCanvas(canvas, ax, colors = "gray")
 
 def switch_view(canvas, ax, switch_N_to_P):
     l = listbox.curselection()[0]
@@ -399,13 +399,14 @@ def DrawCanvas_adapting_path(canvas, ax, colors = "gray"):
 
     q_list.append([0,0,0,0,0]); q_list.append([1,1,1,1,1]);
     y,x = Select_Method_Calculation(p,q_list,epsilon,xi,Sx,Sy,w,option)
+    mx = scale8.get()/100.
     
     if pd_Sx_flag:
         pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sx,w)
     else:
         pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sy,w)
     if l < 5:
-        plt.scatter(y, x, s=20, c=pds, alpha=1, linewidths=0.1, edgecolors='k', cmap='bwr_r', vmin=-1., vmax=1., zorder=2)
+        plt.scatter(y, x, s=20, c=pds, alpha=1, linewidths=0.1, edgecolors='k', cmap='bwr_r', vmin=-mx, vmax=mx, zorder=2)
     else:
         plt.scatter(y, x, s=20, c=pds, alpha=.5, linewidths=0.2, edgecolors='k', cmap='Reds', zorder=2)
     #plt.rcParams["font.size"] = 15
@@ -483,8 +484,11 @@ if __name__ == "__main__":
         listbox.bind('<<ListboxSelect>>', lambda event: switch_view(Canvas, ax1, False))
 
         root.bind("<KeyPress-v>", lambda event: switch_view(Canvas, ax1, True))
-
         root.bind("<Shift-KeyPress-V>", _set_pd_Sx_flag)
+
+        scale8 = tkinter.Scale(root, label='PD max', orient='h', from_=0, to=200, command=partial(Select_DrawCanvas, Canvas, ax1))
+        scale8.set(10)
+        scale8.grid(row=12, column=3, columnspan=1)
 
         
         lbl = tkinter.Label(text='Message:')
