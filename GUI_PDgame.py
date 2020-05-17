@@ -227,11 +227,13 @@ def Quit():
     root.quit()
     root.destroy()
 
-def change_q(canvas, ax):
-    global q_list
-    if corner_case_flag:
+def change_q(canvas, ax, flag):
+    global q_list, corner_case_flag
+    if flag:
+        corner_case_flag = True
         q_list=[[float(format(i,'05b')[0]),float(format(i,'05b')[1]),float(format(i,'05b')[2]),float(format(i,'05b')[3]),float(format(i,'05b')[4])] for i in range(32)]
     else:
+        corner_case_flag = False
         q_list=[[random.random(),random.random(),random.random(),random.random(),random.random()] for i in range(1000)]
     txt.delete(0, tkinter.END)
     txt.insert(tkinter.END,"changed opponents")
@@ -436,19 +438,22 @@ def adjust_zd(l,scale_l):
     xi=round(scale7.get()/1000,3)
     i=1000#stride
     p=[scale0.get()/i,scale1.get()/i,scale2.get()/i,scale3.get()/i,scale4.get()/i]
+    RE = R*(1-epsilon-xi)+S*(epsilon+xi)
     SE = S*(1-epsilon-xi)+R*(epsilon+xi)
     TE = T*(1-epsilon-xi)+P*(epsilon+xi)
+    PE = P*(1-epsilon-xi)+T*(epsilon+xi)
 
 
-    sp.var('p0_ p1_ p2_ p3_ p4_ delta_ T_ S_')
+    sp.var('p0_ p1_ p2_ p3_ p4_ delta_ R_ T_ S_ P_')
     
     pv = [p0_,p1_,p2_,p3_,p4_]
     pl = pv[l]
     
     subs_list = [(pv[i], p[i]) for i in range(5) if i != l]
-    subs_list.extend([(T_, TE),(S_,SE),(delta_,w)])
+    subs_list.extend([(R_,RE),(T_, TE),(S_,SE),(P_,PE),(delta_,w)])
     
-    eq = 1 +2*delta_*p4_ -(1 -delta_*p1_ +delta_*p4_)*(T_+S_) -delta_*p2_ -delta_*p3_
+    eq = (delta_*p2_ +delta_*p3_ -2*delta_*p4_ -1)*(R_ -P_) -(-1 +delta_*p1_ -delta_*p4_)*(T_+S_-2*P_)
+    #eq = 1 +2*delta_*p4_ -(1 -delta_*p1_ +delta_*p4_)*(T_+S_) -delta_*p2_ -delta_*p3_
     #display(sp.solve(eq.subs(subs_list), pl))
     #return sp.solve(eq.subs(subs_list), pl)
     s = sp.solve(eq.subs(subs_list), pl)[0]
@@ -478,12 +483,14 @@ def _set_pd_Sx_flag(event):
     switch_view(Canvas, ax1, draw_coord)
     Select_DrawCanvas(Canvas, ax1)
 
+"""
 def _set_corner_case_flag(event):
     global corner_case_flag
 
     corner_case_flag = not(corner_case_flag)
     change_q(Canvas, ax1)
     Select_DrawCanvas(Canvas, ax1)
+"""
 
 
 draw_coord = True
@@ -510,7 +517,7 @@ if __name__ == "__main__":
         option=0
         q_list=[[random.random(),random.random(),random.random(),random.random(),random.random()] for i in range(1000)]
         
-        ReDrawButton = tkinter.Button(text="Other Opponent", width=15, command=partial(change_q, Canvas, ax1))
+        ReDrawButton = tkinter.Button(text="Other Opponent", width=15, command=partial(change_q, Canvas, ax1, False))
         ReDrawButton.grid(row=8, column=1, columnspan=1)
         TRPSButton = tkinter.Button(text="TRPS 5310", width=15, command=partial(change_5310, Canvas, ax1))
         TRPSButton.grid(row=9, column=1, columnspan=1)
@@ -564,7 +571,8 @@ if __name__ == "__main__":
 
         root.bind("<KeyPress-p>", lambda event: switch_view(Canvas, ax1, True))
         root.bind("<Shift-KeyPress-P>", _set_pd_Sx_flag)
-        root.bind("<Shift-KeyPress-C>", _set_corner_case_flag)
+        root.bind("<Shift-KeyPress-C>", lambda event: change_q(Canvas, ax1, not(corner_case_flag)))
+        #root.bind("<Shift-KeyPress-C>", _set_corner_case_flag)
 
         scale8 = tkinter.Scale(root, label='PD max', orient='h', from_=0, to=200, command=partial(Select_DrawCanvas, Canvas, ax1))
         scale8.set(10)
