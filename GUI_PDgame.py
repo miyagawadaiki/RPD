@@ -505,8 +505,8 @@ if __name__ == "__main__":
         #generate Canvas
         Canvas = FigureCanvasTkAgg(fig, master=root)
         Canvas.get_tk_widget().grid(row=0, column=0, rowspan=1000)
-        T,R,P,S=1.1,1,0,-1.
-        #T,R,P,S=1.5,1,0,-0.5
+        #T,R,P,S=1.1,1,0,-1.
+        T,R,P,S=1.5,1,0,-0.5
         option=0
         q_list=[[random.random(),random.random(),random.random(),random.random(),random.random()] for i in range(1000)]
         
