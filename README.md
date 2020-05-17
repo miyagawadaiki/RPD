@@ -38,6 +38,9 @@
   - それぞれについての偏微分の値を切り替える．Blue: 正，Red: 負（Whiteはゼロ付近）．
 * suboptimal
   - <img src="https://latex.codecogs.com/gif.latex?i=0,...,4">について<img src="https://latex.codecogs.com/gif.latex?\partial"><img src="https://latex.codecogs.com/gif.latex?s_X/\partial"><img src="https://latex.codecogs.com/gif.latex?q_i"> (<img src="https://latex.codecogs.com/gif.latex?\partial"><img src="https://latex.codecogs.com/gif.latex?s_Y/\partial"><img src="https://latex.codecogs.com/gif.latex?q_i">) の二乗和を取り，その値を表示する．ゼロだと赤になり，それ以外では白点で表示される（この値がゼロ=そのときの<img src="https://latex.codecogs.com/gif.latex?{\bf%20q}">は停留点となり，戦略変更の動機付けを持たない）
+  
+#### スライダー
+カラーマップの最大・最小値の絶対値を決める（小さくするほど0に近い偏微分の値が色に現れやすくなる）
 
 #### ショートカットキー
 * v
