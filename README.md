@@ -51,6 +51,8 @@
   - 偏微分係数を計算する際，プレイヤーXの利得についての偏微分（<img src="https://latex.codecogs.com/gif.latex?\partial"><img src="https://latex.codecogs.com/gif.latex?s_X/\partial"><img src="https://latex.codecogs.com/gif.latex?q_i">) かプレイヤーYの利得の偏微分 (<img src="https://latex.codecogs.com/gif.latex?\partial"><img src="https://latex.codecogs.com/gif.latex?s_Y/\partial"><img src="https://latex.codecogs.com/gif.latex?q_i">) かを切り替える．
 * Shift+c:
   - 相手の戦略<img src="https://latex.codecogs.com/gif.latex?{\bf%20q}">の値をコーナーケースに設定する．
+* l:
+  - コーナーケースに設定している状態において，各点の<img src="https://latex.codecogs.com/gif.latex?{\bf%20q}">の値と偏微分の値をグラフ上にテキストで示す．実行するたびに偏微分が負の点のみ，正の点のみ，テキスト非表示の3つを切り替える．
 
 ## UIの例
 ### 条件
