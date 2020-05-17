@@ -204,10 +204,14 @@ def Calc_Partial_Derivative(l, p, q_list, epsilon, xi, Sx, w):
                         -PD(l,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w))
     else :
         for q in q_list:
+            v = np.array([D(p,q,one,epsilon,xi,w) * PD(i,p,q,Sx,epsilon,xi,w) -PD(i,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w) for i in range(5)])
+            rlist.append(v[np.argmax(np.abs(v))])
+            """
             s = 0.
             for i in range(5):
                 s += (D(p,q,one,epsilon,xi,w) * PD(i,p,q,Sx,epsilon,xi,w) -PD(i,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w))**2
             rlist.append(10. if s < 1E-10 else 0.)
+            """
 
     return rlist
 
@@ -271,7 +275,7 @@ def change_way_cal(canvas, ax):
 def switch_view(canvas, ax, switch_N_to_P):
     l = listbox.curselection()[0]
     selected_opt = listbox.get(l)
-    global draw_coord, pd_Sx_flag
+    global draw_coord, pd_Sx_flag, show_label_flag_value
     ss = "sX" if pd_Sx_flag else "sY"
     partial = r"d"
 
@@ -281,10 +285,11 @@ def switch_view(canvas, ax, switch_N_to_P):
         if l < 5:
             txt.insert(tkinter.END, r"Partial derivative view ({0}{1}/{0}{2})".format(partial, ss, selected_opt))
         else:
-            txt.insert(tkinter.END, r"Partial derivative view (suboptimal)")
+            txt.insert(tkinter.END, r"Partial derivative view (optimal direction)")
 
     elif switch_N_to_P and not(draw_coord):
         draw_coord = True
+        show_label_flag_value = 0
         txt.delete(0, tkinter.END)
         txt.insert(tkinter.END, f"Normal view")
 
@@ -294,7 +299,7 @@ def switch_view(canvas, ax, switch_N_to_P):
         if l < 5:
             txt.insert(tkinter.END, r"Partial derivative view ({0}{1}/{0}{2})".format(partial, ss, selected_opt))
         else:
-            txt.insert(tkinter.END, r"Partial derivative view (suboptimal)")
+            txt.insert(tkinter.END, r"Partial derivative view (optimal direction)")
 
     Select_DrawCanvas(canvas, ax, colors = "gray")
 
@@ -392,8 +397,8 @@ def DrawCanvas_adapting_path(canvas, ax, colors = "gray"):
     plt.xlabel("Payoff of Opponent",fontsize=15)
     
     plt.grid()
-    plt.xlim([S-0.2,T+0.2])
-    plt.ylim([S-0.2,T+0.2])
+    plt.xlim([S-0.2,T+0.2]); WIDTH = T-S+0.4
+    plt.ylim([S-0.2,T+0.2]); HEIGHT = T-S+0.4
     if R==3:
         xy_list=[[P-0.65,P-0.35],[R+0.1, R+0.1],[T-0.5, S+0.9],[S+1, T-0.5]]
     else:
@@ -423,10 +428,21 @@ def DrawCanvas_adapting_path(canvas, ax, colors = "gray"):
         pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sx,w)
     else:
         pds = Calc_Partial_Derivative(l,p,q_list,epsilon,xi,Sy,w)
+
+    plt.scatter(y, x, s=20, c=pds, alpha=.5, linewidths=0.1, edgecolors='k', cmap='bwr_r', vmin=-mx, vmax=mx, zorder=2)
+
+    if show_label_flag_value != 0 and corner_case_flag:
+        for i in range(len(pds)):
+            if pds[i]*show_label_flag_value < -1.E-14: #0.:
+                plt.annotate('('+format(i,'05b')+'): {:.1e}'.format(pds[i]), 
+                            xy=(y[i], x[i]), xytext=(y[i]+(WIDTH/20 if i<16 else -WIDTH*6/20), x[i]), 
+                            color='r' if show_label_flag_value>0 else 'b')#, fontsize='large')
+    """
     if l < 5:
         plt.scatter(y, x, s=20, c=pds, alpha=.5, linewidths=0.1, edgecolors='k', cmap='bwr_r', vmin=-mx, vmax=mx, zorder=2)
     else:
         plt.scatter(y, x, s=20, c=pds, alpha=.5, linewidths=0.2, edgecolors='k', cmap='Reds', zorder=2)
+    """
     #plt.rcParams["font.size"] = 15
     
     canvas.draw()
@@ -483,6 +499,14 @@ def _set_pd_Sx_flag(event):
     switch_view(Canvas, ax1, draw_coord)
     Select_DrawCanvas(Canvas, ax1)
 
+
+def _switch_show_label_flag_value(event):
+    global show_label_flag_value, draw_coord
+
+    if not draw_coord:
+        show_label_flag_value = (show_label_flag_value+2)%3-1
+        Select_DrawCanvas(Canvas, ax1)
+
 """
 def _set_corner_case_flag(event):
     global corner_case_flag
@@ -496,6 +520,7 @@ def _set_corner_case_flag(event):
 draw_coord = True
 pd_Sx_flag = True
 corner_case_flag = False
+show_label_flag_value = False
 
 if __name__ == "__main__":
     try:
@@ -563,16 +588,13 @@ if __name__ == "__main__":
         # for partial derivative view 
         view_var = tkinter.StringVar()
         listbox = tkinter.Listbox(root, height=6, width=8)
-        for line in ["q0", "q1","q2","q3", "q4", "suboptimal"]:
+        for line in ["q0", "q1","q2","q3", "q4", "optimal"]:
+        #for line in ["q0", "q1","q2","q3", "q4", "suboptimal"]:
             listbox.insert(tkinter.END, line)
         listbox.select_set(1)
         listbox.grid(row=8, column=3, rowspan=4, columnspan=1)
         listbox.bind('<<ListboxSelect>>', lambda event: switch_view(Canvas, ax1, False))
 
-        root.bind("<KeyPress-p>", lambda event: switch_view(Canvas, ax1, True))
-        root.bind("<Shift-KeyPress-P>", _set_pd_Sx_flag)
-        root.bind("<Shift-KeyPress-C>", lambda event: change_q(Canvas, ax1, not(corner_case_flag)))
-        #root.bind("<Shift-KeyPress-C>", _set_corner_case_flag)
 
         scale8 = tkinter.Scale(root, label='PD max', orient='h', from_=0, to=200, command=partial(Select_DrawCanvas, Canvas, ax1))
         scale8.set(10)
@@ -584,6 +606,13 @@ if __name__ == "__main__":
         txt = tkinter.Entry(width=50)
         txt.place(x=10, y=480)
         txt.insert(tkinter.END,"Welcome!")
+
+
+        # Shortcut Keys
+        root.bind("<KeyPress-p>", lambda event: switch_view(Canvas, ax1, True))
+        root.bind("<Shift-KeyPress-P>", _set_pd_Sx_flag)
+        root.bind("<Shift-KeyPress-C>", lambda event: change_q(Canvas, ax1, not(corner_case_flag)))
+        root.bind("<KeyPress-l>", _switch_show_label_flag_value)
 
         
         Select_DrawCanvas(Canvas,ax1)
