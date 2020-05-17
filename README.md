@@ -14,6 +14,7 @@
   - (0)Detは本研究で見つけた行列式で計算する方法，(1)はHilbe et al.,2015,GEBで示された逆行列の形で計算する方法である
 - 割引因子<img src="https://latex.codecogs.com/gif.latex?w">，エラー率<img src="https://latex.codecogs.com/gif.latex?\epsilon,\xi">は，スライダーで変更できる
 - 戦略<img src="https://latex.codecogs.com/gif.latex?{\bf%20p}=(p_1,p_2,p_3,p_4),p_0=1">の値もスライダーから変更できる．1,000分の1単位で値を変えることができる．
+- 横のzdボタンを押すと，ZD戦略となる値に自動調整してくれる（ZD戦略となる値がある場合のみ）
 ### ボタン
 - Other Opponent
   - 相手の戦略<img src="https://latex.codecogs.com/gif.latex?{\bf%20q}">の値を別のランダムな値に変更する．
@@ -42,11 +43,14 @@
 #### スライダー
 カラーマップの最大・最小値の絶対値を決める（小さくするほど0に近い偏微分の値が色に現れやすくなる）
 
-#### ショートカットキー
-* v
+
+### ショートカットキー
+* p:
   - 通常モードと偏微分係数モードを切り替える（Switch Nomal/APボタンと同じ機能）．
-* Shift+v
+* Shift+p:
   - 偏微分係数を計算する際，プレイヤーXの利得についての偏微分（<img src="https://latex.codecogs.com/gif.latex?\partial"><img src="https://latex.codecogs.com/gif.latex?s_X/\partial"><img src="https://latex.codecogs.com/gif.latex?q_i">) かプレイヤーYの利得の偏微分 (<img src="https://latex.codecogs.com/gif.latex?\partial"><img src="https://latex.codecogs.com/gif.latex?s_Y/\partial"><img src="https://latex.codecogs.com/gif.latex?q_i">) かを切り替える．
+* Shift+c:
+  - 相手の戦略<img src="https://latex.codecogs.com/gif.latex?{\bf%20q}">の値をコーナーケースに設定する．
 
 ## UIの例
 ### 条件
