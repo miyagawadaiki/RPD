@@ -196,8 +196,31 @@ def Calculation_Inverse(p,q_list,epsilon,xi,Sx,Sy,w):
 
 
 def Calc_Partial_Derivative(l, p, q_list, epsilon, xi, Sx, w):
+    global diff_q0_flag
+
     one = [1.,1.,1.,1.]
     rlist = []
+
+    if diff_q0_flag:
+        if l < 5:
+            for q in q_list:
+                rlist.append(D(p,q,one,epsilon,xi,w) * PD(l,p,q,Sx,epsilon,xi,w) 
+                            -PD(l,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w)
+                            +D(p,q,one,epsilon,xi,w) * PD(0,p,q,Sx,epsilon,xi,w)
+                             -PD(0,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w))
+                """
+                rlist.append(abs(D(p,q,one,epsilon,xi,w) * PD(l,p,q,Sx,epsilon,xi,w) 
+                            -PD(l,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w))
+                            -abs(D(p,q,one,epsilon,xi,w) * PD(0,p,q,Sx,epsilon,xi,w)
+                             -PD(0,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w)))
+                """
+        else :
+            for q in q_list:
+                v = np.array([D(p,q,one,epsilon,xi,w) * PD(i,p,q,Sx,epsilon,xi,w) -PD(i,p,q,one,epsilon,xi,w) * D(p,q,Sx,epsilon,xi,w) for i in range(5)])
+                rlist.append(v[np.argmax(np.abs(v))])
+        return rlist
+
+
     if l < 5:
         for q in q_list:
             rlist.append(D(p,q,one,epsilon,xi,w) * PD(l,p,q,Sx,epsilon,xi,w) 
@@ -252,6 +275,18 @@ def change_5310(canvas, ax):
         #T,R,P,S=4.1,4,2,-1
     Select_DrawCanvas(canvas, ax, colors = "gray")
 
+
+def reset_payoff(canvas, ax):
+    global T,R,P,S
+
+    T = float(txtT.get())
+    R = float(txtR.get())
+    P = float(txtP.get())
+    S = float(txtS.get())
+
+    Select_DrawCanvas(canvas, ax, colors = "gray")
+
+
 def save_fig():
     filepath = filedialog.askdirectory(initialdir = dir)
     path=filepath+'\\fig.png'
@@ -275,7 +310,7 @@ def change_way_cal(canvas, ax):
 def switch_view(canvas, ax, switch_N_to_P):
     l = listbox.curselection()[0]
     selected_opt = listbox.get(l)
-    global draw_coord, pd_Sx_flag, show_label_flag_value
+    global draw_coord, pd_Sx_flag, show_label_flag_value, diff_q0_flag
     ss = "sX" if pd_Sx_flag else "sY"
     partial = r"d"
 
@@ -290,6 +325,7 @@ def switch_view(canvas, ax, switch_N_to_P):
     elif switch_N_to_P and not(draw_coord):
         draw_coord = True
         show_label_flag_value = 0
+        diff_q0_flag = False
         txt.delete(0, tkinter.END)
         txt.insert(tkinter.END, f"Normal view")
 
@@ -507,6 +543,15 @@ def _switch_show_label_flag_value(event):
         show_label_flag_value = (show_label_flag_value+2)%3-1
         Select_DrawCanvas(Canvas, ax1)
 
+
+def _switch_diff_q0_flag(event):
+    global diff_q0_flag, corner_case_flag
+
+    if not draw_coord and corner_case_flag:
+        diff_q0_flag = not(diff_q0_flag)
+        Select_DrawCanvas(Canvas, ax1)
+
+
 """
 def _set_corner_case_flag(event):
     global corner_case_flag
@@ -521,12 +566,13 @@ draw_coord = True
 pd_Sx_flag = True
 corner_case_flag = False
 show_label_flag_value = False
+diff_q0_flag = False
 
 if __name__ == "__main__":
     try:
         #generate GUI
         root = tkinter.Tk()
-        root.geometry("750x550")
+        root.geometry("850x550")
         #root.geometry("700x550")
         root.title("GUI- vs 1,000+2 Strategies Under Discounting and Observation Errors in RPD game")
         
@@ -575,14 +621,40 @@ if __name__ == "__main__":
         scale7.grid(row=4, column=1, columnspan=1)
 
         # for adjust to zd strategy
-        AdjustButton = tkinter.Button(text='zd', width=2, command=partial(adjust_zd, 1, scale1))
+        AdjustButton = tkinter.Button(text='zd', width=1, command=partial(adjust_zd, 1, scale1))
         AdjustButton.grid(row=3, column=4, columnspan=1)
-        AdjustButton = tkinter.Button(text='zd', width=2, command=partial(adjust_zd, 2, scale2))
+        AdjustButton = tkinter.Button(text='zd', width=1, command=partial(adjust_zd, 2, scale2))
         AdjustButton.grid(row=4, column=4, columnspan=1)
-        AdjustButton = tkinter.Button(text='zd', width=2, command=partial(adjust_zd, 3, scale3))
+        AdjustButton = tkinter.Button(text='zd', width=1, command=partial(adjust_zd, 3, scale3))
         AdjustButton.grid(row=5, column=4, columnspan=1)
-        AdjustButton = tkinter.Button(text='zd', width=2, command=partial(adjust_zd, 4, scale4))
+        AdjustButton = tkinter.Button(text='zd', width=1, command=partial(adjust_zd, 4, scale4))
         AdjustButton.grid(row=6, column=4, columnspan=1)
+
+
+        # for payoff relationships
+        lbl = tkinter.Label(text='T:')
+        lbl.grid(row=2, column=8, columnspan=1)
+        txtT = tkinter.Entry(width=5)
+        txtT.grid(row=2, column=9, columnspan=1)
+        txtT.insert(tkinter.END, str(T))
+        lbl = tkinter.Label(text='R:')
+        lbl.grid(row=3, column=8, columnspan=1)
+        txtR = tkinter.Entry(width=5)
+        txtR.grid(row=3, column=9, columnspan=1)
+        txtR.insert(tkinter.END, str(R))
+        lbl = tkinter.Label(text='P:')
+        lbl.grid(row=4, column=8, columnspan=1)
+        txtP = tkinter.Entry(width=5)
+        txtP.grid(row=4, column=9, columnspan=1)
+        txtP.insert(tkinter.END, str(P))
+        lbl = tkinter.Label(text='S:')
+        lbl.grid(row=5, column=8, columnspan=1)
+        txtS = tkinter.Entry(width=5)
+        txtS.grid(row=5, column=9, columnspan=1)
+        txtS.insert(tkinter.END, str(S))
+
+        SetPayoffButton = tkinter.Button(text='Done', width=5, command=partial(reset_payoff, Canvas, ax1))
+        SetPayoffButton.grid(row=6, column=8, columnspan=2)
         
 
         # for partial derivative view 
@@ -613,6 +685,7 @@ if __name__ == "__main__":
         root.bind("<Shift-KeyPress-P>", _set_pd_Sx_flag)
         root.bind("<Shift-KeyPress-C>", lambda event: change_q(Canvas, ax1, not(corner_case_flag)))
         root.bind("<KeyPress-l>", _switch_show_label_flag_value)
+        root.bind("<KeyPress-m>", _switch_diff_q0_flag)
 
         
         Select_DrawCanvas(Canvas,ax1)
